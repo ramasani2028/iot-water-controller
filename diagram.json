@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "author": "ADI PRANAV RAMASANI",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkitc",
+      "id": "esp32",
+      "top": 144.6,
+      "left": -0.6,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -130.97,
+      "left": -3.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot1",
+      "top": -78.1,
+      "left": -105.8,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 42.35,
+      "left": 182.4,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic1",
+      "top": -228.9,
+      "left": 379.9,
+      "attrs": { "distance": "2" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 198.2,
+      "left": 297.6,
+      "attrs": { "color": "green", "xray": "1" }
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "sw1",
+      "top": 196.4,
+      "left": 396.7,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-ks2e-m-dc5",
+      "id": "relay1",
+      "top": 100.5,
+      "left": 532.1,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -70.8,
+      "left": 608.6,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 51.95,
+      "left": 643.2,
+      "attrs": { "value": "1000" }
+    }
+  ],
+  "connections": [
+    ["lcd1:VSS", "esp32:GND", "black", ["v48", "h38.4"]],
+    ["esp32:5V", "lcd1:VDD", "red", ["v19.1", "h-169", "v-316.8", "h48"]],
+    ["pot1:GND", "esp32:GND", "black", ["v48", "h48"]],
+    ["pot1:SIG", "lcd1:V0", "green", ["v76.8", "h9.2"]],
+    ["pot1:VCC", "esp32:5V", "red", ["v28.8", "h37.6"]],
+    ["lcd1:RS", "esp32:IO2", "green", ["v105.6", "h19.5"]],
+    ["lcd1:RW", "lcd1:VSS", "black", ["v19.2", "h-38.5"]],
+    ["lcd1:E", "esp32:IO3", "#8f4814", ["v76.8", "h9.6"]],
+    ["lcd1:D4", "esp32:IO4", "gold", ["v115.2", "h86.4"]],
+    ["lcd1:D5", "esp32:IO16", "blue", ["v96", "h67.3"]],
+    ["lcd1:D6", "esp32:IO17", "green", ["v124.8", "h57.8"]],
+    ["lcd1:D7", "esp32:IO5", "yellow", ["v134.4", "h29.1"]],
+    ["lcd1:A", "r1:1", "green", ["v0"]],
+    ["r1:2", "lcd1:VDD", "red", ["v-19.2", "h-202.8"]],
+    ["lcd1:K", "lcd1:VSS", "black", ["v19.2", "h-144", "v-9.6"]],
+    ["ultrasonic1:VCC", "esp32:5V", "red", ["v489.6", "h-288"]],
+    ["ultrasonic1:TRIG", "esp32:IO18", "purple", ["v268.8", "h-288.4"]],
+    ["ultrasonic1:ECHO", "esp32:IO19", "gray", ["v268.8", "h-327.2"]],
+    ["ultrasonic1:GND", "esp32:GND", "black", ["v499.2", "h-308.4"]],
+    [
+      "btn1:2.l",
+      "esp32:GND",
+      "black",
+      ["h-9.6", "v144.2", "h-115.2", "v-28.8"]
+    ],
+    ["btn1:1.r", "esp32:IO13", "white", ["v-38.4", "h-67"]],
+    ["sw1:1", "esp32:IO12", "gold", ["v19.2", "h-19.2"]],
+    ["sw1:2", "esp32:GND", "black", ["v153.6", "h-239.9"]],
+    ["relay1:COIL1", "esp32:GND", "black", ["v260.4", "h-433.3", "v-48"]],
+    ["relay1:COIL2", "esp32:IO23", "#8f4814", ["v-38.4", "h-10.9"]],
+    ["relay1:P1", "esp32:5V", "red", ["v279.6", "h-423.5"]],
+    ["led1:A", "r2:1", "red", ["v0"]],
+    ["relay1:COIL1", "led1:C", "black", ["v39.6", "h46.7"]],
+    ["r2:2", "relay1:NC1", "red", ["v134.4", "h-145.2"]]
+  ],
+  "dependencies": {}
+}
