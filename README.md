@@ -1,101 +1,129 @@
 # IoT Water Controller
 
-A water level monitoring and pump control project built with an Arduino Uno, HC-SR04 ultrasonic sensor, 16x2 LCD, relay module, push button, and slide switch.
+A smart water level monitoring and automated pump control system powered by an **ESP32 Wi-Fi Microcontroller**, featuring an **HTTP Web Server**, **Real-Time Web Dashboard**, **REST JSON API**, 16x2 LCD display, HC-SR04 ultrasonic distance sensor, relay module, push button, and manual/auto selector switch.
 
-> Note: This project currently uses local hardware control and does not include wireless network connectivity.
+---
 
-## Features
+## 🌟 Key Features
 
-- Measures water level using an HC-SR04 ultrasonic sensor
-- Displays water level percentage and pump status on a 16x2 LCD
-- Supports manual and automatic pump control modes
-- Saves the target water level setting in EEPROM for power cycling
+- **Wi-Fi & HTTP Web Server**: Connects to your local Wi-Fi network and serves a responsive Web Dashboard.
+- **Real-Time Web Dashboard**: Displays live water level percentage gauge, pump status, control mode, distance reading, and target calibration.
+- **REST JSON Status API**: Exposes JSON endpoints (`/api/status` & `/status`) for remote IoT integration, home automation (e.g. Home Assistant), or mobile apps.
+- **Remote Pump Control**: Control the pump directly from your browser when in `MANUAL` mode.
+- **Automatic & Manual Modes**: 
+  - `AUTO Mode`: Automatically turns pump ON when water level falls below 30% and turns OFF when water level reaches 95%.
+  - `MANUAL Mode`: Toggle pump on/off via physical push button or web dashboard.
+- **EEPROM Storage**: Saves target calibration depth to EEPROM so settings persist across reboots.
+- **LCD Display**: Local 16x2 LCD displays live percentage, Wi-Fi IP address, and operation status.
 
-## Hardware Components
+---
 
-- Arduino Uno
-- HC-SR04 ultrasonic distance sensor
-- 16x2 LCD display with LiquidCrystal interface
-- 10K potentiometer for LCD contrast
-- Relay module for pump control
-- Push button for mode-specific actions
-- Slide switch to select Manual / Auto mode
-- 5V power supply and wiring
+## 🛠️ Hardware Necessities Needed
 
-## Pin Connections
+1. **ESP32 Development Board** (e.g., ESP32 DevKit v1 / ESP-WROOM-32).
+2. **HC-SR04 / HC-SR04P Ultrasonic Sensor** (Ultrasonic water depth measurement).
+3. **16x2 LCD Display** + 10kΩ Potentiometer (for contrast adjustment).
+4. **5V Relay Module** (Active-Low or Active-High, for pump switching).
+5. **Push Button** (For manual toggle & target calibration).
+6. **Slide Switch** (For selecting AUTO / MANUAL mode).
+7. **Resistors**:
+   - 1kΩ & 2kΩ resistors (used as a voltage divider to step down HC-SR04 Echo 5V signal to 3.3V for ESP32 safety).
+   - 220Ω resistor (LCD backlight protection).
+8. **Power Supply**: 5V DC supply (for relay & ultrasonic sensor) & Micro-USB / USB-C cable for ESP32.
+9. **Breadboard & Jumper Wires**.
 
-- LCD `RS` -> `D2`
-- LCD `E` -> `D3`
-- LCD `D4` -> `D4`
-- LCD `D5` -> `D5`
-- LCD `D6` -> `D6`
-- LCD `D7` -> `D7`
-- LCD `VSS` -> `GND`
-- LCD `VDD` -> `5V`
-- LCD `RW` -> `GND`
-- LCD contrast `V0` -> Potentiometer output
-- Potentiometer ends -> `5V` and `GND`
+---
 
-- HC-SR04 `VCC` -> `5V`
-- HC-SR04 `GND` -> `GND`
-- HC-SR04 `TRIG` -> `D8`
-- HC-SR04 `ECHO` -> `D9`
+## 💻 Software Necessities Needed to Install
 
-- Push button -> `D10` (with `INPUT_PULLUP`; button connects to `GND` when pressed)
-- Slide switch -> `D11` (with `INPUT_PULLUP`; switch connects to `GND` in one position)
+To build, flash, and run this project, install the following software tools:
 
-- Relay control -> `D12`
-- Relay `VCC` -> `5V`
-- Relay `GND` -> `GND`
+### 1. Arduino IDE
+- Download and install **Arduino IDE** (v2.x or v1.8.x): [https://www.arduino.cc/en/software](https://www.arduino.cc/en/software)
 
-## Operation
+### 2. ESP32 Board Package (Espressif Systems)
+1. Open Arduino IDE and go to **File > Preferences** (or `Ctrl + ,`).
+2. Add the following URL to **Additional Boards Manager URLs**:
+   ```
+   https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+   ```
+3. Go to **Tools > Board > Boards Manager...**.
+4. Search for `esp32` (by Espressif Systems) and click **Install**.
 
-- **Auto mode**: Slide switch enabled for auto, the controller automatically turns the pump on when water level falls below the low threshold and off when the tank is full.
-- **Manual mode**: Slide switch set to manual, and button presses toggle the pump state directly.
-- **Set target level**: In auto mode, press the button to store the current water level as the desired reference level. The target value is saved in EEPROM and retained across power cycles.
+### 3. USB-to-UART Serial Driver
+Depending on your ESP32 board's USB chip, install the driver so your computer detects the board's COM port:
+- **CP210x Driver**: [Silicon Labs CP210x Drivers](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)
+- **CH340 / CH341 Driver**: [WCH CH340 Driver](http://www.wch-ic.com/downloads/CH341SER_EXE.html)
 
-## Code Overview
+### 4. Required Arduino Libraries
+- `WiFi.h` *(Built into ESP32 board core)*
+- `WebServer.h` *(Built into ESP32 board core)*
+- `EEPROM.h` *(Built into ESP32 board core)*
+- `LiquidCrystal` *(Install via Arduino IDE: **Sketch > Include Library > Manage Libraries...**, search `LiquidCrystal`)*
 
-- `sketch.ino` reads ultrasonic distance in inches and computes water level percentage using an EEPROM-stored reference level.
-- `LiquidCrystal` manages the LCD display.
-- `EEPROM` stores the desired water level reference so the system remembers it after restarting.
+---
 
-## IoT Upgrade
+## 📌 Pin Connections (ESP32)
 
-This project now includes a true IoT version using an ESP32:
+| Component | Pin | ESP32 GPIO |
+| :--- | :--- | :--- |
+| **LCD Display** | RS | GPIO 2 |
+| | Enable (E) | GPIO 3 *(Or GPIO 15/27 on physical hardware)* |
+| | D4 | GPIO 4 |
+| | D5 | GPIO 16 |
+| | D6 | GPIO 17 |
+| | D7 | GPIO 5 |
+| **HC-SR04** | Trig | GPIO 18 |
+| | Echo | GPIO 19 *(via 1kΩ/2kΩ voltage divider)* |
+| **Relay Module** | Control (IN) | GPIO 23 |
+| **Push Button** | Signal | GPIO 13 *(with internal `INPUT_PULLUP`)* |
+| **Slide Switch** | Signal | GPIO 12 *(with internal `INPUT_PULLUP`)* |
 
-- `sketch_esp32.ino` — ESP32 firmware with Wi-Fi, web dashboard, and JSON status API
-- `sketch_legacy.ino` — original Arduino Uno version preserved for reference
+---
 
-### IoT features
+## 🚀 Setup & Flashing Instructions
 
-- Connects to Wi-Fi and serves a web dashboard over HTTP
-- Displays live water level, pump state, and mode
-- Supports manual pump toggle from the browser in Manual mode
-- Saves the target water level in EEPROM
-- Provides a JSON status endpoint at `/status`
+1. Open `sketch.ino` in **Arduino IDE**.
+2. Update Wi-Fi credentials at lines 8–9:
+   ```cpp
+   const char* ssid = "YOUR_WIFI_SSID";
+   const char* password = "YOUR_WIFI_PASSWORD";
+   ```
+3. Select Board & Port:
+   - Go to **Tools > Board > ESP32 Arduino > ESP32 Dev Module** (or your specific board model).
+   - Go to **Tools > Port** and select your ESP32 COM port.
+4. Upload the sketch (**Ctrl + U**).
+5. Open Serial Monitor (**Ctrl + Shift + M**) at **115200 baud** to view Wi-Fi connection progress and IP address.
+6. Open your web browser and navigate to `http://<ESP32_IP_ADDRESS>` to access the live dashboard!
 
-### Additional notes for ESP32 hardware
+---
 
-- Use a 3.3V-capable microcontroller such as ESP32 or ESP8266
-- The HC-SR04 echo pin must be level-shifted before connecting to ESP32 input pins
-- Relay modules should be powered from a stable 5V supply and share a common ground with the ESP32
+## 🌐 Web Dashboard & REST API Endpoints
 
-## Simulation
+| Route | HTTP Method | Description |
+| :--- | :--- | :--- |
+| `/` | `GET` | HTML Web Dashboard with real-time progress gauge & controls |
+| `/api/status` | `GET` | Returns JSON status payload (mode, pump, water_percent, distance, target, RSSI, uptime) |
+| `/api/toggle` | `POST` / `GET` | Toggles pump state (only available in `MANUAL` mode) |
+| `/api/set-target` | `POST` / `GET` | Saves current measured distance as reference target level |
 
-- The original project can still be simulated using Wokwi with `wokwi-project.txt` or `diagram.json`.
-- Required library: `LiquidCrystal`
+### Sample JSON API Response (`/api/status`):
+```json
+{
+  "mode": "AUTO",
+  "pump": "OFF",
+  "pump_boolean": false,
+  "water_percent": 85,
+  "distance_in": 15,
+  "target_in": 100,
+  "wifi_rssi": -62,
+  "ip": "192.168.1.105",
+  "uptime_sec": 1420
+}
+```
 
-## Files in this Project
+---
 
-- `sketch_ino` — Arduino Uno firmware source
-- `sketch_esp32.ino` — ESP32 IoT firmware
-- `sketch_legacy.ino` — preserved legacy Uno firmware copy
-- `wokwi-project.txt` — Wokwi project export
-- `diagram.json` — Wokwi circuit description
-- `libraries.txt` — required library list
+## ⚡ Simulation
 
-## Notes
-
-- The upgraded project now supports true IoT operation with local web access and remote monitoring via the ESP32.
-- Configure `ssid` and `password` inside `sketch_esp32.ino` before uploading.
+You can simulate the circuit on [Wokwi](https://wokwi.com) using `diagram.json` and `wokwi-project.txt`.
